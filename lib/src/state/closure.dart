@@ -5,7 +5,7 @@ import 'upvalue_holder.dart';
 class Closure {
 
   final Prototype? proto;
-  final DartFunction? dartFunc;
+  final DartFunctionAsync? dartFunc;
   final List<UpvalueHolder?> upvals;
 
   Closure(Prototype this.proto) :

@@ -6,37 +6,46 @@ import '../api/lua_state.dart';
 import '../api/lua_type.dart';
 
 class BasicLib {
-  static const Map<String, DartFunction?> _baseFuncs = {
-    "print": _basePrint,
-    "assert": _baseAssert,
-    "error": _baseError,
-    "select": _baseSelect,
-    "ipairs": _baseIPairs,
+  static Map<String, DartFunctionAsync?> _baseFuncs = {
+    "print":  _basePrint,
+    "assert": toAsyncFunction(_baseAssert),
+    "error": toAsyncFunction(_baseError),
+    "select": toAsyncFunction(_baseSelect),
+    "ipairs": toAsyncFunction(_baseIPairs),
     "pairs": _basePairs,
-    "next": _baseNext,
-    "load": _baseLoad,
-    "loadfile": _baseLoadFile,
+    "next": toAsyncFunction(_baseNext),
+    "load": toAsyncFunction(_baseLoad),
+    "loadfile": toAsyncFunction(_baseLoadFile),
     "dofile": _baseDoFile,
     "pcall": _basePCall,
-    "xpcall": _baseXPCall,
-    "getmetatable": _baseGetMetatable,
-    "setmetatable": _baseSetMetatable,
-    "rawequal": _baseRawEqual,
-    "rawlen": _baseRawLen,
-    "rawget": _baseRawGet,
-    "rawset": _baseRawSet,
-    "type": _baseType,
-    "tostring": _baseToString,
-    "tonumber": _baseToNumber,
+    "xpcall": toAsyncFunction(_baseXPCall),
+    "getmetatable": toAsyncFunction(_baseGetMetatable),
+    "setmetatable": toAsyncFunction(_baseSetMetatable),
+    "rawequal": toAsyncFunction(_baseRawEqual),
+    "rawlen": toAsyncFunction(_baseRawLen),
+    "rawget": toAsyncFunction(_baseRawGet),
+    "rawset": toAsyncFunction(_baseRawSet),
+    "type": toAsyncFunction(_baseType),
+    "tostring": toAsyncFunction(_baseToString),
+    "tonumber": toAsyncFunction(_baseToNumber),
     /* placeholders */
     "_G": null,
     "_VERSION": null
   };
 
-  static int openBaseLib(LuaState ls) {
+  static Future<int> Function(LuaState) toAsyncFunction(DartFunction f) {
+    return (LuaState ls) async {
+      return await f(ls);
+    };
+  }
+
+  static Future<int> openBaseLib(LuaState ls) async {
     /* open lib into global table */
     ls.pushGlobalTable();
-    ls.setFuncs(_baseFuncs, 0);
+
+
+
+    ls.setFuncsAsync(_baseFuncs, 0);
     /* set global _G */
     ls.pushValue(-1);
     ls.setField(-2, "_G");
@@ -49,13 +58,13 @@ class BasicLib {
 // print (···)
 // http://www.lua.org/manual/5.3/manual.html#pdf-print
 // lua-5.3.4/src/lbaselib.c#luaB_print()
-  static int _basePrint(LuaState ls) {
+  static Future<int> _basePrint(LuaState ls) async {
     int n = ls.getTop(); /* number of arguments */
     ls.getGlobal('tostring');
     for (int i = 1; i <= n; i++) {
       ls.pushValue(-1); /* function to be called */
       ls.pushValue(i); /* value to print */
-      ls.call(1, 1);
+      await ls.call(1, 1);
       String? s = ls.toStr(-1); /* get result */
       if (s == null) {
         return ls.error2("'tostring' must return a string to 'print'");
@@ -126,7 +135,7 @@ class BasicLib {
 // lua-5.3.4/src/lbaselib.c#luaB_ipairs()
   static int _baseIPairs(LuaState ls) {
     ls.checkAny(1);
-    ls.pushDartFunction(iPairsAux); /* iteration function */
+    ls.pushDartFunction(toAsyncFunction(iPairsAux)); /* iteration function */
     ls.pushValue(1); /* state */
     ls.pushInteger(0); /* initial value */
     return 3;
@@ -141,16 +150,16 @@ class BasicLib {
 // pairs (t)
 // http://www.lua.org/manual/5.3/manual.html#pdf-pairs
 // lua-5.3.4/src/lbaselib.c#luaB_pairs()
-  static int _basePairs(LuaState ls) {
+  static Future<int> _basePairs(LuaState ls) async {
     ls.checkAny(1);
     if (ls.getMetafield(1, "__pairs") == LuaType.luaNil) {
       /* no metamethod? */
-      ls.pushDartFunction(_baseNext); /* will return generator, */
+      ls.pushDartFunction(toAsyncFunction(_baseNext)); /* will return generator, */
       ls.pushValue(1); /* state, */
       ls.pushNil();
     } else {
       ls.pushValue(1); /* argument 'self' to metamethod */
-      ls.call(1, 3); /* get 3 values from metamethod */
+      await ls.call(1, 3); /* get 3 values from metamethod */
     }
     return 3;
   }
@@ -217,21 +226,21 @@ class BasicLib {
 // dofile ([filename])
 // http://www.lua.org/manual/5.3/manual.html#pdf-dofile
 // lua-5.3.4/src/lbaselib.c#luaB_dofile()
-  static int _baseDoFile(LuaState ls) {
+  static Future<int> _baseDoFile(LuaState ls) async {
     String? fname = ls.optString(1, "bt");
     ls.setTop(1);
     if (ls.loadFile(fname) != ThreadStatus.luaOk) {
       return ls.error();
     }
-    ls.call(0, luaMultret);
+    await ls.call(0, luaMultret);
     return ls.getTop() - 1;
   }
 
 // pcall (f [, arg1, ···])
 // http://www.lua.org/manual/5.3/manual.html#pdf-pcall
-  static int _basePCall(LuaState ls) {
+  static Future<int> _basePCall(LuaState ls) async {
     int nArgs = ls.getTop() - 1;
-    ThreadStatus status = ls.pCall(nArgs, -1, 0);
+    ThreadStatus status = await ls.pCall(nArgs, -1, 0);
     ls.pushBoolean(status == ThreadStatus.luaOk);
     ls.insert(1);
     return ls.getTop();

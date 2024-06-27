@@ -55,13 +55,19 @@ class PackageLib {
     return 1; // return 'package' table
   }
 
+  static Future<int> Function(LuaState) toAsyncFunction(DartFunction f) {
+    return (LuaState ls) async {
+      return await f(ls);
+    };
+  }
+
   static void _createSearchersTable(LuaState ls) {
     List<DartFunction> searchers = [_preloadSearcher, _luaSearcher];
     var len = searchers.length;
     ls.createTable(len, 0);
     for (var idx = 0; idx < len; idx++) {
       ls.pushValue(-2);
-      ls.pushDartClosure(searchers[idx], 1);
+      ls.pushDartClosure(toAsyncFunction(searchers[idx]), 1);
       ls.rawSetI(-2, idx + 1);
     }
     ls.setField(-2, "searchers");

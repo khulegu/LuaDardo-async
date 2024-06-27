@@ -1,15 +1,18 @@
-import 'package:lua_dardo/lua.dart';
 
 
-void main(List<String> arguments) {
+import 'package:lua_dardo_async/lua.dart';
+
+Future<void> main(List<String> arguments) async {
   LuaState state = LuaState.newState();
-  state.openLibs();
+  await state.openLibs();
+
+  state.registerAsync("wait", (ls) => Future.delayed(Duration(seconds: 1), () => 0));
+
   state.loadString(r'''
-a=10
-while( a < 20 ) do
-   print("a value is", a)
-   a = a+1
-end
+   print("before the wait")
+   wait()
+   print("after the wait")
 ''');
   state.call(0, 0);
+  print("end of the script");
 }

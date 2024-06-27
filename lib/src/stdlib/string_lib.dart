@@ -448,6 +448,12 @@ class StringLib {
       ..[1] = nMatches;
   }
 
+  static Future<int> Function(LuaState) toAsyncFunction(DartFunction f) {
+    return (LuaState ls) async {
+      return await f(ls);
+    };
+  }
+
 // string.gmatch (s, pattern)
 // http://www.lua.org/manual/5.3/manual.html#pdf-string.gmatch
   static int _strGmatch(LuaState ls) {
@@ -471,7 +477,7 @@ class StringLib {
       }
     };
 
-    ls.pushDartFunction(gmatchAux as int Function(LuaState));
+    ls.pushDartFunction(toAsyncFunction(gmatchAux as int Function(LuaState)));
     return 1;
   }
 

@@ -279,11 +279,11 @@ class Instructions {
   }
 
   // R(A+3), ... ,R(A+2+C) := R(A)(R(A+1), R(A+2));
-  static void tForCall(int i, LuaVM vm) {
+  static Future<void> tForCall(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int c = Instruction.getC(i);
     pushFuncAndArgs(a, 3, vm);
-    vm.call(2, c);
+    await vm.call(2, c);
     popResults(a + 3, c + 1, vm);
   }
 
@@ -396,23 +396,23 @@ class Instructions {
   }
 
   // return R(A)(R(A+1), ... ,R(A+B-1))
-  static void tailCall(int i, LuaVM vm) {
+  static Future<void> tailCall(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int b = Instruction.getB(i);
     // todo: optimize tail call!
     int c = 0;
     int nArgs = pushFuncAndArgs(a, b, vm);
-    vm.call(nArgs, c - 1);
+    await vm.call(nArgs, c - 1);
     popResults(a, c, vm);
   }
 
   // R(A), ... ,R(A+C-2) := R(A)(R(A+1), ... ,R(A+B-1))
-  static void call(int i, LuaVM vm) {
+  static Future<void> call(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int b = Instruction.getB(i);
     int c = Instruction.getC(i);
     int nArgs = pushFuncAndArgs(a, b, vm);
-    vm.call(nArgs, c - 1);
+    await vm.call(nArgs, c - 1);
     popResults(a, c, vm);
   }
 

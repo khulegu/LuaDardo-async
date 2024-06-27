@@ -54,12 +54,12 @@ abstract class LuaAuxLib {
 
   bool callMeta(int obj, String e);
 
-  void openLibs();
+  Future<void> openLibs();
 
   int ref (int t);
   void unRef (int t, int ref);
 
-  void requireF(String modname, DartFunction openf, bool glb);
+  void requireF(String modname, DartFunctionAsync openf, bool glb);
 
   void newLib(Map<String, DartFunction?> l);
 
@@ -68,4 +68,5 @@ abstract class LuaAuxLib {
 
   void setMetatableAux(String tname);
   void setFuncs(Map<String, DartFunction?> l, int nup);
+  void setFuncsAsync(Map<String, DartFunctionAsync?> l, int nup);
 }

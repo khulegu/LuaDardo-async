@@ -1,4 +1,4 @@
-import 'package:lua_dardo/lua.dart';
+import 'package:lua_dardo_async/lua.dart';
 import 'package:test/test.dart';
 
 

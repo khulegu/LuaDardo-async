@@ -90,9 +90,9 @@ abstract class LuaBasicAPI {
 
   void pushFString(String fmt, [List<Object>? a]);
 
-  void pushDartFunction(DartFunction f);
+  void pushDartFunction(DartFunctionAsync f);
 
-  void pushDartClosure(DartFunction f, int n);
+  void pushDartClosure(DartFunctionAsync f, int n);
 
   void pushGlobalTable();
 
@@ -141,12 +141,14 @@ abstract class LuaBasicAPI {
 
   void register(String name, DartFunction f);
 
+  void registerAsync(String name, DartFunctionAsync f);
+
 /* 'load' and 'call' functions (load and run Lua code) */
   ThreadStatus load(Uint8List chunk, String chunkName, String? mode);
 
-  void call(int nArgs, int nResults);
+  Future<void> call(int nArgs, int nResults);
 
-  ThreadStatus pCall(int nArgs, int nResults, int msgh);
+  Future<ThreadStatus> pCall(int nArgs, int nResults, int msgh);
 
 /* miscellaneous functions */
   void len(int idx);

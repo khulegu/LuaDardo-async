@@ -52,3 +52,4 @@ enum ThreadStatus {
 }
 
 typedef DartFunction = int Function(LuaState ls);
+typedef DartFunctionAsync = Future<int> Function(LuaState ls);

@@ -1,5 +1,4 @@
-import 'package:lua_dardo/src/state/lua_userdata.dart';
-
+import '../../lua.dart';
 import '../api/lua_type.dart';
 import '../number/lua_number.dart';
 import 'closure.dart';
