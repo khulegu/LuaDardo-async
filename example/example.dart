@@ -12,6 +12,10 @@ Future<void> main(List<String> arguments) async {
    print("before the wait")
    wait()
    print("after the wait")
+   a = 1;
+   b = 3;
+   c = 2 + 2;
+   print(c);
 ''');
   state.call(0, 0);
   print("end of the script");

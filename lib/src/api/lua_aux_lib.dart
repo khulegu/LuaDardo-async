@@ -16,13 +16,13 @@ abstract class LuaAuxLib {
 
   void checkType(int arg, LuaType t);
 
-  int? checkInteger(int arg);
+  Future<int?> checkInteger(int arg);
 
   double? checkNumber(int arg);
 
   String? checkString(int arg);
 
-  int? optInteger(int arg, int? d);
+  Future<int?> optInteger(int arg, int? d);
 
   double? optNumber(int arg, double d);
 
@@ -42,31 +42,31 @@ abstract class LuaAuxLib {
 /* Other functions */
   String typeName2(int idx);
 
-  String? toString2(int idx);
+  Future<String?> toString2(int idx);
 
   int? len2(int idx);
 
-  bool getSubTable(int idx, String fname);
+  Future<bool> getSubTable(int idx, String fname);
 
-  LuaType getMetatableAux(String tname);
+  Future<LuaType> getMetatableAux(String tname);
 
-  LuaType getMetafield(int obj, String e);
+  Future<LuaType> getMetafield(int obj, String e);
 
-  bool callMeta(int obj, String e);
+  Future<bool> callMeta(int obj, String e);
 
   Future<void> openLibs();
 
-  int ref (int t);
-  void unRef (int t, int ref);
+  Future<int> ref (int t);
+  Future<void> unRef (int t, int ref);
 
-  void requireF(String modname, DartFunctionAsync openf, bool glb);
+  Future<void> requireF(String modname, DartFunctionAsync openf, bool glb);
 
-  void newLib(Map<String, DartFunction?> l);
+  Future<void> newLib(Map<String, DartFunctionAsync?> l);
 
   void newLibTable(Map<String, DartFunction> l);
-  bool newMetatable(String tname);
+  Future<bool> newMetatable(String tname);
 
-  void setMetatableAux(String tname);
-  void setFuncs(Map<String, DartFunction?> l, int nup);
-  void setFuncsAsync(Map<String, DartFunctionAsync?> l, int nup);
+  Future<void> setMetatableAux(String tname);
+  Future<void> setFuncs(Map<String, DartFunction?> l, int nup);
+  Future<void> setFuncsAsync(Map<String, DartFunctionAsync?> l, int nup);
 }

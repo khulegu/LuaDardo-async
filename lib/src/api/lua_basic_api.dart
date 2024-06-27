@@ -97,11 +97,11 @@ abstract class LuaBasicAPI {
   void pushGlobalTable();
 
 /* comparison and arithmetic functions */
-  void arith(ArithOp op);
+  Future<void> arith(ArithOp op);
 
-  bool compare(int idx1, int idx2, CmpOp op);
+  Future<bool> compare(int idx1, int idx2, CmpOp op);
 
-  bool rawEqual(int idx1, int idx2);
+  Future<bool> rawEqual(int idx1, int idx2);
 
 /* get functions (Lua -> stack) */
   void newTable();
@@ -110,34 +110,34 @@ abstract class LuaBasicAPI {
 
   void createTable(int nArr, int nRec);
 
-  LuaType getTable(int idx);
+  Future<LuaType> getTable(int idx);
 
-  LuaType getField(int idx, String? k);
+  Future<LuaType> getField(int idx, String? k);
 
-  LuaType getI(int idx, int i);
+  Future<LuaType> getI(int idx, int i);
 
-  LuaType rawGet(int idx);
+  Future<LuaType> rawGet(int idx);
 
-  LuaType rawGetI(int idx, int i);
+  Future<LuaType> rawGetI(int idx, int i);
 
-  LuaType getGlobal(String name);
+  Future<LuaType> getGlobal(String name);
 
   bool getMetatable(int idx);
 
 /* set functions (stack -> Lua) */
-  void setTable(int idx);
+  Future<void> setTable(int idx);
 
-  void setField(int idx, String? k);
+  Future<void> setField(int idx, String? k);
 
-  void setI(int idx, int? i);
+  Future<void> setI(int idx, int? i);
 
-  void rawSet(int idx);
+  Future<void> rawSet(int idx);
 
-  void rawSetI(int idx, int i);
+  Future<void> rawSetI(int idx, int i);
 
   void setMetatable(int idx);
 
-  void setGlobal(String name);
+  Future<void> setGlobal(String name);
 
   void register(String name, DartFunction f);
 
@@ -153,7 +153,7 @@ abstract class LuaBasicAPI {
 /* miscellaneous functions */
   void len(int idx);
 
-  void concat(int n);
+  Future<void> concat(int n);
 
   bool next(int idx);
 

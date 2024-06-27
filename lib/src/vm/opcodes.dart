@@ -97,44 +97,44 @@ final opCodes = <OpCode>[
   OpCode(0, 1, OpArgMask.OpArgU, OpArgMask.OpArgU, OpMode.iABC , "LOADBOOL",toAsyncOp(Instructions.loadBool)), // R(A) := (bool)B; if (C) pc++
   OpCode(0, 1, OpArgMask.OpArgU, OpArgMask.OpArgN, OpMode.iABC , "LOADNIL",toAsyncOp(Instructions.loadNil)), // R(A), R(A+1), ..., R(A+B) := nil
   OpCode(0, 1, OpArgMask.OpArgU, OpArgMask.OpArgN, OpMode.iABC , "GETUPVAL",toAsyncOp(Instructions.getUpval)), // R(A) := UpValue[B]
-  OpCode(0, 1, OpArgMask.OpArgU, OpArgMask.OpArgK, OpMode.iABC , "GETTABUP",toAsyncOp(Instructions.getTabUp)), // R(A) := UpValue[B][RK(C)]
-  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgK, OpMode.iABC , "GETTABLE",toAsyncOp(Instructions.getTable)), // R(A) := R(B)[RK(C)]
-  OpCode(0, 0, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "SETTABUP",toAsyncOp(Instructions.setTabUp)), // UpValue[A][RK(B)] := RK(C)
+  OpCode(0, 1, OpArgMask.OpArgU, OpArgMask.OpArgK, OpMode.iABC , "GETTABUP",Instructions.getTabUp), // R(A) := UpValue[B][RK(C)]
+  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgK, OpMode.iABC , "GETTABLE",Instructions.getTable), // R(A) := R(B)[RK(C)]
+  OpCode(0, 0, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "SETTABUP",Instructions.setTabUp), // UpValue[A][RK(B)] := RK(C)
   OpCode(0, 0, OpArgMask.OpArgU, OpArgMask.OpArgN, OpMode.iABC , "SETUPVAL",toAsyncOp(Instructions.setUpval)), // UpValue[B] := R(A)
-  OpCode(0, 0, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "SETTABLE",toAsyncOp(Instructions.setTable)), // R(A)[RK(B)] := RK(C)
+  OpCode(0, 0, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "SETTABLE",Instructions.setTable), // R(A)[RK(B)] := RK(C)
   OpCode(0, 1, OpArgMask.OpArgU, OpArgMask.OpArgU, OpMode.iABC , "NEWTABLE",toAsyncOp(Instructions.newTable)), // R(A) := () (size = B,C)
-  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgK, OpMode.iABC , "SELF",toAsyncOp(Instructions.self)), // R(A+1) := R(B); R(A) := R(B)[RK(C)]
-  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "ADD",toAsyncOp(Instructions.add)), // R(A) := RK(B) + RK(C)
-  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "SUB",toAsyncOp(Instructions.sub)), // R(A) := RK(B) - RK(C)
-  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "MUL",toAsyncOp(Instructions.mul)), // R(A) := RK(B) * RK(C)
-  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "MOD",toAsyncOp(Instructions.mod)), // R(A) := RK(B) % RK(C)
-  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "POW",toAsyncOp(Instructions.pow)), // R(A) := RK(B) ^ RK(C)
-  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "DIV",toAsyncOp(Instructions.div)), // R(A) := RK(B) / RK(C)
-  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "IDIV",toAsyncOp(Instructions.idiv)), // R(A) := RK(B) // RK(C)
-  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "BAND",toAsyncOp(Instructions.band)), // R(A) := RK(B) & RK(C)
-  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "BOR",toAsyncOp(Instructions.bor)), // R(A) := RK(B) | RK(C)
-  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "BXOR",toAsyncOp(Instructions.bxor)), // R(A) := RK(B) ~ RK(C)
-  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "SHL",toAsyncOp(Instructions.shl)), // R(A) := RK(B) << RK(C)
-  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "SHR",toAsyncOp(Instructions.shr)), // R(A) := RK(B) >> RK(C)
-  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iABC , "UNM",toAsyncOp(Instructions.unm)), // R(A) := -R(B)
-  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iABC , "BNOT",toAsyncOp(Instructions.bnot)), // R(A) := ~R(B)
+  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgK, OpMode.iABC , "SELF",Instructions.self), // R(A+1) := R(B); R(A) := R(B)[RK(C)]
+  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "ADD",Instructions.add), // R(A) := RK(B) + RK(C)
+  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "SUB",Instructions.sub), // R(A) := RK(B) - RK(C)
+  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "MUL",Instructions.mul), // R(A) := RK(B) * RK(C)
+  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "MOD",Instructions.mod), // R(A) := RK(B) % RK(C)
+  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "POW",Instructions.pow), // R(A) := RK(B) ^ RK(C)
+  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "DIV",Instructions.div), // R(A) := RK(B) / RK(C)
+  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "IDIV",Instructions.idiv), // R(A) := RK(B) // RK(C)
+  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "BAND",Instructions.band), // R(A) := RK(B) & RK(C)
+  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "BOR",Instructions.bor), // R(A) := RK(B) | RK(C)
+  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "BXOR",Instructions.bxor), // R(A) := RK(B) ~ RK(C)
+  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "SHL",Instructions.shl), // R(A) := RK(B) << RK(C)
+  OpCode(0, 1, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "SHR",Instructions.shr), // R(A) := RK(B) >> RK(C)
+  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iABC , "UNM",Instructions.unm), // R(A) := -R(B)
+  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iABC , "BNOT",Instructions.bnot), // R(A) := ~R(B)
   OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iABC , "NOT",toAsyncOp(Instructions.not)), // R(A) := not R(B)
   OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iABC , "LEN",toAsyncOp(Instructions.length)), // R(A) := length of R(B)
-  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgR, OpMode.iABC , "CONCAT",toAsyncOp(Instructions.concat)), // R(A) := R(B).. ... ..R(C)
+  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgR, OpMode.iABC , "CONCAT",Instructions.concat), // R(A) := R(B).. ... ..R(C)
   OpCode(0, 0, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iAsBx , "JMP",toAsyncOp(Instructions.jmp)), // pc+=sBx; if (A) close all upvalues >= R(A - 1)
-  OpCode(1, 0, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "EQ",toAsyncOp(Instructions.eq)), // if ((RK(B) == RK(C)) ~= A) then pc++
-  OpCode(1, 0, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "LT",toAsyncOp(Instructions.lt)), // if ((RK(B) <  RK(C)) ~= A) then pc++
-  OpCode(1, 0, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "LE",toAsyncOp(Instructions.le)), // if ((RK(B) <= RK(C)) ~= A) then pc++
+  OpCode(1, 0, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "EQ",Instructions.eq), // if ((RK(B) == RK(C)) ~= A) then pc++
+  OpCode(1, 0, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "LT",Instructions.lt), // if ((RK(B) <  RK(C)) ~= A) then pc++
+  OpCode(1, 0, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "LE",Instructions.le), // if ((RK(B) <= RK(C)) ~= A) then pc++
   OpCode(1, 0, OpArgMask.OpArgN, OpArgMask.OpArgU, OpMode.iABC , "TEST",toAsyncOp(Instructions.test)), // if not (R(A) <=> C) then pc++
   OpCode(1, 1, OpArgMask.OpArgR, OpArgMask.OpArgU, OpMode.iABC , "TESTSET",toAsyncOp(Instructions.testSet)), // if (R(B) <=> C) then R(A) := R(B) else pc++
   OpCode(0, 1, OpArgMask.OpArgU, OpArgMask.OpArgU, OpMode.iABC , "CALL",Instructions.call), // R(A), ... ,R(A+C-2) := R(A)(R(A+1), ... ,R(A+B-1))
   OpCode(0, 1, OpArgMask.OpArgU, OpArgMask.OpArgU, OpMode.iABC , "TAILCALL",Instructions.tailCall), // return R(A)(R(A+1), ... ,R(A+B-1))
   OpCode(0, 0, OpArgMask.OpArgU, OpArgMask.OpArgN, OpMode.iABC , "RETURN",toAsyncOp(Instructions.return_)), // return R(A), ... ,R(A+B-2)
-  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iAsBx , "FORLOOP",toAsyncOp(Instructions.forLoop)), // R(A)+=R(A+2); if R(A) <?= R(A+1) then ( pc+=sBx; R(A+3)=R(A) )
-  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iAsBx , "FORPREP",toAsyncOp(Instructions.forPrep)), // R(A)-=R(A+2); pc+=sBx
+  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iAsBx , "FORLOOP",Instructions.forLoop), // R(A)+=R(A+2); if R(A) <?= R(A+1) then ( pc+=sBx; R(A+3)=R(A) )
+  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iAsBx , "FORPREP",Instructions.forPrep), // R(A)-=R(A+2); pc+=sBx
   OpCode(0, 0, OpArgMask.OpArgN, OpArgMask.OpArgU, OpMode.iABC , "TFORCALL",Instructions.tForCall), // R(A+3), ... ,R(A+2+C) := R(A)(R(A+1), R(A+2));
   OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iAsBx , "TFORLOOP",toAsyncOp(Instructions.tForLoop)), // if R(A+1) ~= nil then ( R(A)=R(A+1); pc += sBx )
-  OpCode(0, 0, OpArgMask.OpArgU, OpArgMask.OpArgU, OpMode.iABC , "SETLIST",toAsyncOp(Instructions.setList)), // R(A)[(C-1)*FPF+i] := R(A+i), 1 <= i <= B
+  OpCode(0, 0, OpArgMask.OpArgU, OpArgMask.OpArgU, OpMode.iABC , "SETLIST",Instructions.setList), // R(A)[(C-1)*FPF+i] := R(A+i), 1 <= i <= B
   OpCode(0, 1, OpArgMask.OpArgU, OpArgMask.OpArgN, OpMode.iABx , "CLOSURE",toAsyncOp(Instructions.closure)), // R(A) := closure(KPROTO[Bx])
   OpCode(0, 1, OpArgMask.OpArgU, OpArgMask.OpArgN, OpMode.iABC , "VARARG",toAsyncOp(Instructions.vararg)), // R(A), R(A+1), ..., R(A+B-2) = vararg
   OpCode(0, 0, OpArgMask.OpArgU, OpArgMask.OpArgU, OpMode.iAx , "EXTRAARG",null), // extra (larger) argument for previous opcode

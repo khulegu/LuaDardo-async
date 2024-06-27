@@ -3,22 +3,29 @@ import 'dart:io';
 import '../../lua.dart';
 
 class OSLib {
-  static const Map<String, DartFunction> _sysFuncs = {
-    "clock": _osClock,
+
+  static Future<int> Function(LuaState) toAsyncFunction(DartFunction f) {
+    return (LuaState ls) async {
+      return await f(ls);
+    };
+  }
+
+  static Map<String, DartFunctionAsync> _sysFuncs = {
+    "clock": toAsyncFunction(_osClock),
     "difftime": _osDiffTime,
     "time": _osTime,
     "date": _osDate,
-    "remove": _osRemove,
-    "rename": _osRename,
-    "tmpname": _osTmpName,
-    "getenv": _osGetEnv,
-    "execute": _osExecute,
+    "remove": toAsyncFunction(_osRemove),
+    "rename": toAsyncFunction(_osRename),
+    "tmpname": toAsyncFunction(_osTmpName),
+    "getenv": toAsyncFunction(_osGetEnv),
+    "execute": toAsyncFunction(_osExecute),
     "exit": _osExit,
-    "setlocale": _osSetLocale,
+    "setlocale": toAsyncFunction(_osSetLocale),
   };
 
-  static int openOSLib(LuaState ls) {
-    ls.newLib(_sysFuncs);
+  static Future<int> openOSLib(LuaState ls) async {
+    await ls.newLib(_sysFuncs);
     return 1;
   }
 
@@ -33,9 +40,9 @@ class OSLib {
 // os.difftime (t2, t1)
 // http://www.lua.org/manual/5.3/manual.html#pdf-os.difftime
 // lua-5.3.4/src/loslib.c#os_difftime()
-  static int _osDiffTime(LuaState ls) {
-    var t2 = ls.checkInteger(1)!;
-    var t1 = ls.checkInteger(2)!;
+  static Future<int> _osDiffTime(LuaState ls) async {
+    var t2 = (await ls.checkInteger(1))!;
+    var t1 = (await ls.checkInteger(2))!;
     ls.pushInteger(t2 - t1);
     return 1;
   }
@@ -43,7 +50,7 @@ class OSLib {
 // os.time ([table])
 // http://www.lua.org/manual/5.3/manual.html#pdf-os.time
 // lua-5.3.4/src/loslib.c#os_time()
-  static int _osTime(LuaState ls) {
+  static Future<int> _osTime(LuaState ls) async {
     if (ls.isNoneOrNil(1)) {
       /* called without args? */
       var t =
@@ -51,12 +58,12 @@ class OSLib {
       ls.pushInteger(t);
     } else {
       ls.checkType(1, LuaType.luaTable);
-      var sec = _getField(ls, "sec", 0);
-      var min = _getField(ls, "min", 0);
-      var hour = _getField(ls, "hour", 12);
-      var day = _getField(ls, "day", -1);
-      var month = _getField(ls, "month", -1);
-      var year = _getField(ls, "year", -1);
+      var sec = await _getField(ls, "sec", 0);
+      var min = await _getField(ls, "min", 0);
+      var hour = await _getField(ls, "hour", 12);
+      var day = await _getField(ls, "day", -1);
+      var month = await _getField(ls, "month", -1);
+      var year = await _getField(ls, "year", -1);
       // todo: isdst
       var t =
           DateTime(year, month, day, hour, min, sec).millisecondsSinceEpoch ~/
@@ -67,8 +74,8 @@ class OSLib {
   }
 
 // lua-5.3.4/src/loslib.c#getfield()
-  static int _getField(LuaState ls, String key, int dft) {
-    var t = ls.getField(-1, key); /* get field and its type */
+  static Future<int> _getField(LuaState ls, String key, int dft) async {
+    var t = await ls.getField(-1, key); /* get field and its type */
     var res = ls.toIntegerX(-1);
     if (res == null) {
       /* field is not an integer? */
@@ -88,7 +95,7 @@ class OSLib {
 // os.date ([format [, time]])
 // http://www.lua.org/manual/5.3/manual.html#pdf-os.date
 // lua-5.3.4/src/loslib.c#os_date()
-  static int _osDate(LuaState ls) {
+  static Future<int> _osDate(LuaState ls) async {
     var format = ls.optString(1, "%c")!;
     DateTime t;
     if (ls.isInteger(2)) {
@@ -105,14 +112,14 @@ class OSLib {
 
     if (format == "*t") {
       ls.createTable(0, 9); /* 9 = number of fields */
-      _setField(ls, "sec", t.second);
-      _setField(ls, "min", t.minute);
-      _setField(ls, "hour", t.hour);
-      _setField(ls, "day", t.day);
-      _setField(ls, "month", t.month);
-      _setField(ls, "year", t.year);
-      _setField(ls, "wday", t.weekday);
-      _setField(ls, "yday", _getYearDay(t));
+      await _setField(ls, "sec", t.second);
+      await _setField(ls, "min", t.minute);
+      await _setField(ls, "hour", t.hour);
+      await _setField(ls, "day", t.day);
+      await _setField(ls, "month", t.month);
+      await _setField(ls, "year", t.year);
+      await _setField(ls, "wday", t.weekday);
+      await _setField(ls, "yday", _getYearDay(t));
     } else if (format == "%c") {
       ls.pushString(t.toString());
     } else {
@@ -136,9 +143,9 @@ class OSLib {
     return date.day + sum;
   }
 
-  static void _setField(LuaState ls, String key, int value) {
+  static Future<void> _setField(LuaState ls, String key, int value) async {
     ls.pushInteger(value);
-    ls.setField(-2, key);
+    await ls.setField(-2, key);
   }
 
 // os.remove (filename)
@@ -212,7 +219,7 @@ class OSLib {
 // os.exit ([code [, close]])
 // http://www.lua.org/manual/5.3/manual.html#pdf-os.exit
 // lua-5.3.4/src/loslib.c#os_exit()
-  static int _osExit(LuaState ls) {
+  static Future<int> _osExit(LuaState ls) async {
     if (ls.isBoolean(1)) {
       if (ls.toBoolean(1)) {
         exit(0);
@@ -220,7 +227,7 @@ class OSLib {
         exit(1); // todo
       }
     } else {
-      var code = ls.optInteger(1, 1)!;
+      var code = (await ls.optInteger(1, 1))!;
       exit(code);
     }
   }

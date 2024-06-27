@@ -7,40 +7,47 @@ class StringLib {
   static final tagPattern =
       RegExp(r'%[ #+-0]?[0-9]*(\.[0-9]+)?[cdeEfgGioqsuxX%]');
 
-  static const Map<String, DartFunction> _strLib = {
-    "len": _strLen,
+  static Future<int> Function(LuaState) toAsyncFunction(DartFunction f) {
+    return (LuaState ls) async {
+      return await f(ls);
+    };
+  }
+
+  static final Map<String, DartFunctionAsync> _strLib = {
+    "len": toAsyncFunction(_strLen),
     "rep": _strRep,
-    "reverse": _strReverse,
-    "lower": _strLower,
-    "upper": _strUpper,
+    "reverse": toAsyncFunction(_strReverse),
+    "lower": toAsyncFunction(_strLower),
+    "upper": toAsyncFunction(_strUpper),
     "sub": _strSub,
     "byte": _strByte,
     "char": _strChar,
-    "dump": _strDump,
+    "dump": toAsyncFunction(_strDump),
     "format": _strFormat,
-    "packsize": _strPackSize,
-    "pack": _strPack,
-    "unpack": _strUnpack,
+    "packsize": toAsyncFunction(_strPackSize),
+    "pack": toAsyncFunction(_strPack),
+    "unpack": toAsyncFunction(_strUnpack),
     "find": _strFind,
     "match": _strMatch,
     "gsub": _strGsub,
-    "gmatch": _strGmatch,
+    "gmatch": toAsyncFunction(_strGmatch),
   };
 
-  static int openStringLib(LuaState ls) {
-    ls.newLib(_strLib);
-    _createMetatable(ls);
+  static Future<int> openStringLib(LuaState ls) async {
+
+    await ls.newLib(_strLib);
+    await _createMetatable(ls);
     return 1;
   }
 
-  static void _createMetatable(LuaState ls) {
+  static Future<void> _createMetatable(LuaState ls) async {
     ls.createTable(0, 1); /* table to be metatable for strings */
     ls.pushString("dummy"); /* dummy string */
     ls.pushValue(-2); /* copy table */
     ls.setMetatable(-2); /* set table as metatable for strings */
     ls.pop(1); /* pop dummy string */
     ls.pushValue(-2); /* get string library */
-    ls.setField(-2, "__index"); /* metatable.__index = string */
+    await ls.setField(-2, "__index"); /* metatable.__index = string */
     ls.pop(1); /* pop metatable */
   }
 
@@ -58,9 +65,9 @@ class StringLib {
 // string.rep (s, n [, sep])
 // http://www.lua.org/manual/5.3/manual.html#pdf-string.rep
 // lua-5.3.4/src/lstrlib.c#str_rep()
-  static int _strRep(LuaState ls) {
+  static Future<int> _strRep(LuaState ls) async {
     String? s = ls.checkString(1);
-    int n = ls.checkInteger(2)!;
+    int n = (await ls.checkInteger(2))!;
     String? sep = ls.optString(3, "");
 
     if (n <= 0) {
@@ -118,11 +125,11 @@ class StringLib {
 // string.sub (s, i [, j])
 // http://www.lua.org/manual/5.3/manual.html#pdf-string.sub
 // lua-5.3.4/src/lstrlib.c#str_sub()
-  static int _strSub(LuaState ls) {
+  static Future<int> _strSub(LuaState ls) async {
     String s = ls.checkString(1)!;
     var sLen = s.length;
-    var i = posRelat(ls.checkInteger(2)!, sLen);
-    var j = posRelat(ls.optInteger(3, -1)!, sLen);
+    var i = posRelat((await ls.checkInteger(2))!, sLen);
+    var j = posRelat((await ls.optInteger(3, -1))!, sLen);
 
     if (i < 1) {
       i = 1;
@@ -143,11 +150,11 @@ class StringLib {
 // string.byte (s [, i [, j]])
 // http://www.lua.org/manual/5.3/manual.html#pdf-string.byte
 // lua-5.3.4/src/lstrlib.c#str_byte()
-  static int _strByte(LuaState ls) {
+  static Future<int> _strByte(LuaState ls) async {
     String s = ls.checkString(1)!;
     var sLen = s.length;
-    var i = posRelat(ls.optInteger(2, 1)!, sLen);
-    var j = posRelat(ls.optInteger(3, i)!, sLen);
+    var i = posRelat((await ls.optInteger(2, 1))!, sLen);
+    var j = posRelat((await ls.optInteger(3, i))!, sLen);
 
     if (i < 1) {
       i = 1;
@@ -175,13 +182,13 @@ class StringLib {
 // string.char (···)
 // http://www.lua.org/manual/5.3/manual.html#pdf-string.char
 // lua-5.3.4/src/lstrlib.c#str_char()
-  static int _strChar(LuaState ls) {
+  static Future<int> _strChar(LuaState ls) async {
     var nArgs = ls.getTop();
 
     // s = make([]byte, nArgs)
     var s = List<int>.filled(nArgs,0);
     for (var i = 1; i <= nArgs; i++) {
-      var c = ls.checkInteger(i)!;
+      var c = (await ls.checkInteger(i))!;
       ls.argCheck((c & 0xff) == c, i, "value out of range");
       s[i - 1] = c;
     }
@@ -227,7 +234,7 @@ class StringLib {
 
 // string.format (formatstring, ···)
 // http://www.lua.org/manual/5.3/manual.html#pdf-string.format
-  static int _strFormat(LuaState ls) {
+  static Future<int> _strFormat(LuaState ls) async {
     var fmtStr = ls.checkString(1)!;
     if (fmtStr.length <= 1 || fmtStr.indexOf('%') < 0) {
       ls.pushString(fmtStr);
@@ -243,7 +250,7 @@ class StringLib {
           arr[i] = "%";
         } else {
           argIdx += 1;
-          arr[i] = _fmtArg(arr[i]!, ls, argIdx);
+          arr[i] = await _fmtArg(arr[i]!, ls, argIdx);
         }
       }
     }
@@ -282,7 +289,7 @@ class StringLib {
     return parsed;
   }
 
-  static String? _fmtArg(String tag, LuaState ls, int argIdx) {
+  static Future<String?> _fmtArg(String tag, LuaState ls, int argIdx) async {
     switch (tag[tag.length - 1]) {
       // specifier
       case 'c': // character
@@ -303,7 +310,7 @@ class StringLib {
         return sprintf(tag, [ls.toNumber(argIdx)]);
       case 's':
       case 'q': // string
-        return sprintf(tag, [ls.toString2(argIdx)]);
+        return sprintf(tag, [await ls.toString2(argIdx)]);
       default:
         throw Exception("todo! tag=" + tag);
     }
@@ -313,11 +320,11 @@ class StringLib {
 
 // string.find (s, pattern [, init [, plain]])
 // http://www.lua.org/manual/5.3/manual.html#pdf-string.find
-  static int _strFind(LuaState ls) {
+  static Future<int> _strFind(LuaState ls) async {
     var s = ls.checkString(1)!;
     var sLen = s.length;
     var pattern = ls.checkString(2);
-    var init = posRelat(ls.optInteger(3, 1)!, sLen);
+    var init = posRelat((await ls.optInteger(3, 1))!, sLen);
     if (init < 1) {
       init = 1;
     } else if (init > sLen + 1) {
@@ -366,11 +373,11 @@ class StringLib {
 
 // string.match (s, pattern [, init])
 // http://www.lua.org/manual/5.3/manual.html#pdf-string.match
-  static int _strMatch(LuaState ls) {
+  static Future<int> _strMatch(LuaState ls) async {
     var s = ls.checkString(1)!;
     var sLen = s.length;
     var pattern = ls.checkString(2);
-    var init = posRelat(ls.optInteger(3, 1)!, sLen);
+    var init = posRelat((await ls.optInteger(3, 1))!, sLen);
     if (init < 1) {
       init = 1;
     } else if (init > sLen + 1) {
@@ -405,11 +412,11 @@ class StringLib {
 
 // string.gsub (s, pattern, repl [, n])
 // http://www.lua.org/manual/5.3/manual.html#pdf-string.gsub
-  static int _strGsub(LuaState ls) {
+  static Future<int> _strGsub(LuaState ls) async {
     var s = ls.checkString(1);
     var pattern = ls.checkString(2)!;
     var repl = ls.checkString(3); // todo
-    var n = ls.optInteger(4, -1)!;
+    var n = (await ls.optInteger(4, -1))!;
 
     var r = gsub(s, pattern, repl, n);
     var newStr = r[0];
@@ -446,12 +453,6 @@ class StringLib {
     return List.filled(2,null)
       ..[0] = '$newHead$tail'
       ..[1] = nMatches;
-  }
-
-  static Future<int> Function(LuaState) toAsyncFunction(DartFunction f) {
-    return (LuaState ls) async {
-      return await f(ls);
-    };
   }
 
 // string.gmatch (s, pattern)

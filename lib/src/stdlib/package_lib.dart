@@ -30,63 +30,64 @@ class PackageLib {
     "loaded": null,
   };
 
-  static const Map<String, DartFunction> _llFuncs = {"require": _pkgRequire};
+  static const Map<String, DartFunctionAsync> _llFuncs = {"require": _pkgRequire};
 
-  static int openPackageLib(LuaState ls) {
-    ls.newLib(_pkgFuncs);
-    _createSearchersTable(ls);
+  static Future<int> openPackageLib(LuaState ls) async {
+    Map<String, DartFunctionAsync?> _asyncPkgFuncs = _pkgFuncs.map((key, value) {
+      if(value == null) return MapEntry(key, null);
+      return MapEntry(key, (ls) async {
+        return value(ls);
+      });
+    });
+
+    await ls.newLib(_asyncPkgFuncs);
+    await _createSearchersTable(ls);
     // set paths
     ls.pushString("./?.lua;./?/init.lua");
-    ls.setField(-2, "path");
+    await ls.setField(-2, "path");
     // store config information
     ls.pushString(
         '$lua_dirsep\n$lua_path_sep\n$lua_path_mark\n$lua_exec_dir\n$lua_igmark\n');
-    ls.setField(-2, "config");
+    await ls.setField(-2, "config");
     // set field 'loaded'
-    ls.getSubTable(luaRegistryIndex, lua_loaded_table);
-    ls.setField(-2, "loaded");
+    await ls.getSubTable(luaRegistryIndex, lua_loaded_table);
+    await ls.setField(-2, "loaded");
     // set field 'preload'
-    ls.getSubTable(luaRegistryIndex, lua_preload_table);
-    ls.setField(-2, "preload");
+    await ls.getSubTable(luaRegistryIndex, lua_preload_table);
+    await ls.setField(-2, "preload");
     ls.pushGlobalTable();
     ls.pushValue(-2); // set 'package' as upvalue for next lib
-    ls.setFuncs(_llFuncs, 1); // open lib into global table
+    await ls.setFuncsAsync(_llFuncs, 1); // open lib into global table
     ls.pop(1); // pop global table
     return 1; // return 'package' table
   }
 
-  static Future<int> Function(LuaState) toAsyncFunction(DartFunction f) {
-    return (LuaState ls) async {
-      return await f(ls);
-    };
-  }
-
-  static void _createSearchersTable(LuaState ls) {
-    List<DartFunction> searchers = [_preloadSearcher, _luaSearcher];
+  static Future<void> _createSearchersTable(LuaState ls) async {
+    List<DartFunctionAsync> searchers = [_preloadSearcher, _luaSearcher];
     var len = searchers.length;
     ls.createTable(len, 0);
     for (var idx = 0; idx < len; idx++) {
       ls.pushValue(-2);
-      ls.pushDartClosure(toAsyncFunction(searchers[idx]), 1);
-      ls.rawSetI(-2, idx + 1);
+      ls.pushDartClosure(searchers[idx], 1);
+      await ls.rawSetI(-2, idx + 1);
     }
-    ls.setField(-2, "searchers");
+    await ls.setField(-2, "searchers");
   }
 
-  static int _preloadSearcher(LuaState ls) {
+  static Future<int> _preloadSearcher(LuaState ls) async {
     var name = ls.checkString(1);
-    ls.getField(luaRegistryIndex, "_PRELOAD");
+    await ls.getField(luaRegistryIndex, "_PRELOAD");
 
-    if (ls.getField(-1, name) == LuaType.luaNil) {
+    if (await ls.getField(-1, name) == LuaType.luaNil) {
       /* not found? */
       ls.pushString("\n\tno field package.preload['" + name! + "']");
     }
     return 1;
   }
 
-  static int _luaSearcher(LuaState ls) {
+  static Future<int> _luaSearcher(LuaState ls) async {
     var name = ls.checkString(1);
-    ls.getField(Instructions.luaUpvalueIndex(1), "path");
+    await ls.getField(Instructions.luaUpvalueIndex(1), "path");
     var path = ls.toStr(-1);
     if (path == null) {
       return ls.error2("'package.path' must be a string");
@@ -155,37 +156,37 @@ class PackageLib {
 
   // require (modname)
   // http://www.lua.org/manual/5.3/manual.html#pdf-require
-  static int _pkgRequire(LuaState ls) {
+  static Future<int> _pkgRequire(LuaState ls) async {
     var name = ls.checkString(1);
     ls.setTop(1); // LOADED table will be at index 2
-    ls.getField(luaRegistryIndex, lua_loaded_table);
-    ls.getField(2, name); // LOADED[name]
+    await ls.getField(luaRegistryIndex, lua_loaded_table);
+    await ls.getField(2, name); // LOADED[name]
     if (ls.toBoolean(-1)) {
       // is it there?
       return 1; // package is already loaded
     }
     // else must load package
     ls.pop(1); // remove 'getfield' result
-    _findLoader(ls, name);
+    await _findLoader(ls, name);
     ls.pushString(name); // pass name as argument to module loader
     ls.insert(-2); // name is 1st argument (before search data)
-    ls.call(2, 1); // run loader to load module
+    await ls.call(2, 1); // run loader to load module
 
     if (!ls.isNil(-1)) {
       // non-nil return?
-      ls.setField(2, name); // LOADED[name] = returned value
+      await ls.setField(2, name); // LOADED[name] = returned value
     }
 
     // module set no value?
     if (ls.getField(2, name) == LuaType.luaNil) {
       ls.pushBoolean(true); // use true as result
       ls.pushValue(-1); // extra copy to be returned
-      ls.setField(2, name); // LOADED[name] = true
+      await ls.setField(2, name); // LOADED[name] = true
     }
     return 1;
   }
 
-  static void _findLoader(LuaState ls, String? name) {
+  static Future<void> _findLoader(LuaState ls, String? name) async {
     // push 'package.searchers' to index 3 in the stack
     if (ls.getField(Instructions.luaUpvalueIndex(1), "searchers") !=
         LuaType.luaTable) {
@@ -198,7 +199,7 @@ class PackageLib {
 
     //  iterate over available searchers to find a loader
     for (var i = 1;; i++) {
-      if (ls.rawGetI(3, i) == LuaType.luaNil) {
+      if (await ls.rawGetI(3, i) == LuaType.luaNil) {
         // no more searchers?
         ls.pop(1); // remove nil
         ls.error2(errMsg); // create error message

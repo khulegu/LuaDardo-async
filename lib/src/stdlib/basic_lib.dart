@@ -8,9 +8,9 @@ import '../api/lua_type.dart';
 class BasicLib {
   static Map<String, DartFunctionAsync?> _baseFuncs = {
     "print":  _basePrint,
-    "assert": toAsyncFunction(_baseAssert),
-    "error": toAsyncFunction(_baseError),
-    "select": toAsyncFunction(_baseSelect),
+    "assert": _baseAssert,
+    "error": _baseError,
+    "select": _baseSelect,
     "ipairs": toAsyncFunction(_baseIPairs),
     "pairs": _basePairs,
     "next": toAsyncFunction(_baseNext),
@@ -21,13 +21,13 @@ class BasicLib {
     "xpcall": toAsyncFunction(_baseXPCall),
     "getmetatable": toAsyncFunction(_baseGetMetatable),
     "setmetatable": toAsyncFunction(_baseSetMetatable),
-    "rawequal": toAsyncFunction(_baseRawEqual),
+    "rawequal": _baseRawEqual,
     "rawlen": toAsyncFunction(_baseRawLen),
-    "rawget": toAsyncFunction(_baseRawGet),
-    "rawset": toAsyncFunction(_baseRawSet),
+    "rawget": _baseRawGet,
+    "rawset": _baseRawSet,
     "type": toAsyncFunction(_baseType),
-    "tostring": toAsyncFunction(_baseToString),
-    "tonumber": toAsyncFunction(_baseToNumber),
+    "tostring": _baseToString,
+    "tonumber": _baseToNumber,
     /* placeholders */
     "_G": null,
     "_VERSION": null
@@ -45,13 +45,13 @@ class BasicLib {
 
 
 
-    ls.setFuncsAsync(_baseFuncs, 0);
+    await ls.setFuncsAsync(_baseFuncs, 0);
     /* set global _G */
     ls.pushValue(-1);
-    ls.setField(-2, "_G");
+    await ls.setField(-2, "_G");
     /* set global _VERSION */
     ls.pushString("Lua 5.3"); // todo
-    ls.setField(-2, "_VERSION");
+    await ls.setField(-2, "_VERSION");
     return 1;
   }
 
@@ -82,7 +82,7 @@ class BasicLib {
 // assert (v [, message])
 // http://www.lua.org/manual/5.3/manual.html#pdf-assert
 // lua-5.3.4/src/lbaselib.c#luaB_assert()
-  static int _baseAssert(LuaState ls) {
+  static Future<int> _baseAssert(LuaState ls) async {
     if (ls.toBoolean(1)) {
       /* condition is true? */
       return ls.getTop(); /* return all arguments */
@@ -92,15 +92,15 @@ class BasicLib {
       ls.remove(1); /* remove it */
       ls.pushString("assertion failed!"); /* default message */
       ls.setTop(1); /* leave only message (default if no other one) */
-      return _baseError(ls); /* call 'error' */
+      return await _baseError(ls); /* call 'error' */
     }
   }
 
 // error (message [, level])
 // http://www.lua.org/manual/5.3/manual.html#pdf-error
 // lua-5.3.4/src/lbaselib.c#luaB_error()
-  static int _baseError(LuaState ls) {
-    int? level = ls.optInteger(2, 1);
+  static Future<int> _baseError(LuaState ls) async {
+    int? level = await ls.optInteger(2, 1);
     ls.setTop(1);
     if (ls.type(1) == LuaType.luaString && level! > 0) {
       // ls.where(level) /* add extra information */
@@ -113,13 +113,13 @@ class BasicLib {
 // select (index, ···)
 // http://www.lua.org/manual/5.3/manual.html#pdf-select
 // lua-5.3.4/src/lbaselib.c#luaB_select()
-  static int _baseSelect(LuaState ls) {
+  static Future<int> _baseSelect(LuaState ls) async {
     int n = ls.getTop();
     if (ls.type(1) == LuaType.luaString && ls.checkString(1) == "#") {
       ls.pushInteger(n - 1);
       return 1;
     } else {
-      int i = ls.checkInteger(1)!;
+      int i = (await ls.checkInteger(1))!;
       if (i < 0) {
         i = n + i;
       } else if (i > n) {
@@ -135,16 +135,16 @@ class BasicLib {
 // lua-5.3.4/src/lbaselib.c#luaB_ipairs()
   static int _baseIPairs(LuaState ls) {
     ls.checkAny(1);
-    ls.pushDartFunction(toAsyncFunction(iPairsAux)); /* iteration function */
+    ls.pushDartFunction(iPairsAux); /* iteration function */
     ls.pushValue(1); /* state */
     ls.pushInteger(0); /* initial value */
     return 3;
   }
 
-  static int iPairsAux(LuaState ls) {
-    int i = ls.checkInteger(2)! + 1;
+  static Future<int> iPairsAux(LuaState ls) async {
+    int i = (await ls.checkInteger(2))! + 1;
     ls.pushInteger(i);
-    return ls.getI(1, i) == LuaType.luaNil ? 1 : 2;
+    return await ls.getI(1, i) == LuaType.luaNil ? 1 : 2;
   }
 
 // pairs (t)
@@ -284,10 +284,10 @@ class BasicLib {
 // rawequal (v1, v2)
 // http://www.lua.org/manual/5.3/manual.html#pdf-rawequal
 // lua-5.3.4/src/lbaselib.c#luaB_rawequal()
-  static int _baseRawEqual(LuaState ls) {
+  static Future<int> _baseRawEqual(LuaState ls) async {
     ls.checkAny(1);
     ls.checkAny(2);
-    ls.pushBoolean(ls.rawEqual(1, 2));
+    ls.pushBoolean(await ls.rawEqual(1, 2));
     return 1;
   }
 
@@ -305,23 +305,23 @@ class BasicLib {
 // rawget (table, index)
 // http://www.lua.org/manual/5.3/manual.html#pdf-rawget
 // lua-5.3.4/src/lbaselib.c#luaB_rawget()
-  static int _baseRawGet(LuaState ls) {
+  static Future<int> _baseRawGet(LuaState ls) async {
     ls.checkType(1, LuaType.luaTable);
     ls.checkAny(2);
     ls.setTop(2);
-    ls.rawGet(1);
+    await ls.rawGet(1);
     return 1;
   }
 
 // rawset (table, index, value)
 // http://www.lua.org/manual/5.3/manual.html#pdf-rawset
 // lua-5.3.4/src/lbaselib.c#luaB_rawset()
-  static int _baseRawSet(LuaState ls) {
+  static Future<int> _baseRawSet(LuaState ls) async {
     ls.checkType(1, LuaType.luaTable);
     ls.checkAny(2);
     ls.checkAny(3);
     ls.setTop(3);
-    ls.rawSet(1);
+    await ls.rawSet(1);
     return 1;
   }
 
@@ -338,16 +338,16 @@ class BasicLib {
 // tostring (v)
 // http://www.lua.org/manual/5.3/manual.html#pdf-tostring
 // lua-5.3.4/src/lbaselib.c#luaB_tostring()
-  static int _baseToString(LuaState ls) {
+  static Future<int> _baseToString(LuaState ls) async {
     ls.checkAny(1);
-    ls.toString2(1);
+    await ls.toString2(1);
     return 1;
   }
 
 // tonumber (e [, base])
 // http://www.lua.org/manual/5.3/manual.html#pdf-tonumber
 // lua-5.3.4/src/lbaselib.c#luaB_tonumber()
-  static int _baseToNumber(LuaState ls) {
+  static Future<int> _baseToNumber(LuaState ls) async {
     if (ls.isNoneOrNil(2)) {
       /* standard conversion? */
       ls.checkAny(1);
@@ -366,7 +366,7 @@ class BasicLib {
     } else {
       ls.checkType(1, LuaType.luaString); /* no numbers as strings */
       String s = ls.toStr(1)!.trim();
-      int base = ls.checkInteger(2)!;
+      int base = (await ls.checkInteger(2))!;
       ls.argCheck(2 <= base && base <= 36, 2, "base out of range");
       try {
         int n = int.parse(s, radix: base);

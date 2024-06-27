@@ -58,7 +58,7 @@ class Arithmetic{
     "__bnot"
   ];
 
-  static Object? arith(Object? a, Object? b, ArithOp op, LuaStateImpl ls) {
+  static Future<Object?> arith(Object? a, Object? b, ArithOp op, LuaStateImpl ls) async {
     Function? integerFunc = _integerOps[op.index];
     Function? floatFunc = _floatOps[op.index];
 
@@ -86,7 +86,7 @@ class Arithmetic{
     }
     Object? mm = ls.getMetamethod(a, b, _metamethods[op.index]);
     if (mm != null) {
-      return ls.callMetamethod(a, b, mm);
+      return await ls.callMetamethod(a, b, mm);
     }
 
     throw Exception("arithmetic error!");

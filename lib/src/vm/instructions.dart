@@ -70,104 +70,104 @@ class Instructions {
 
   /* arith */
 
-  static void add(int i, LuaVM vm) {
-    binaryArith(i, vm, ArithOp.luaOpAdd);
+  static Future<void> add(int i, LuaVM vm) async {
+    await binaryArith(i, vm, ArithOp.luaOpAdd);
   } // +
 
-  static void sub(int i, LuaVM vm) {
-    binaryArith(i, vm, ArithOp.luaOpSub);
+  static Future<void> sub(int i, LuaVM vm) async {
+    await binaryArith(i, vm, ArithOp.luaOpSub);
   } // -
 
-  static void mul(int i, LuaVM vm) {
-    binaryArith(i, vm, ArithOp.luaOpMul);
+  static Future<void> mul(int i, LuaVM vm) async {
+    await binaryArith(i, vm, ArithOp.luaOpMul);
   } // *
 
-  static void mod(int i, LuaVM vm) {
-    binaryArith(i, vm, ArithOp.luaOpMod);
+  static Future<void> mod(int i, LuaVM vm) async {
+    await binaryArith(i, vm, ArithOp.luaOpMod);
   } // %
 
-  static void pow(int i, LuaVM vm) {
-    binaryArith(i, vm, ArithOp.luaOpPow);
+  static Future<void> pow(int i, LuaVM vm) async {
+    await binaryArith(i, vm, ArithOp.luaOpPow);
   } // ^
 
-  static void div(int i, LuaVM vm) {
-    binaryArith(i, vm, ArithOp.luaOpDiv);
+  static Future<void> div(int i, LuaVM vm) async {
+    await binaryArith(i, vm, ArithOp.luaOpDiv);
   } // /
 
-  static void idiv(int i, LuaVM vm) {
-    binaryArith(i, vm, ArithOp.luaOpIdiv);
+  static Future<void> idiv(int i, LuaVM vm) async {
+    await binaryArith(i, vm, ArithOp.luaOpIdiv);
   } // //
 
-  static void band(int i, LuaVM vm) {
-    binaryArith(i, vm, ArithOp.luaOpBand);
+  static Future<void> band(int i, LuaVM vm) async {
+    await binaryArith(i, vm, ArithOp.luaOpBand);
   } // &
 
-  static void bor(int i, LuaVM vm) {
-    binaryArith(i, vm, ArithOp.luaOpBor);
+  static Future<void> bor(int i, LuaVM vm) async {
+    await binaryArith(i, vm, ArithOp.luaOpBor);
   } // |
 
-  static void bxor(int i, LuaVM vm) {
-    binaryArith(i, vm, ArithOp.luaOpBxor);
+  static Future<void> bxor(int i, LuaVM vm) async {
+    await binaryArith(i, vm, ArithOp.luaOpBxor);
   } // ~
 
-  static void shl(int i, LuaVM vm) {
-    binaryArith(i, vm, ArithOp.luaOpShl);
+  static Future<void> shl(int i, LuaVM vm) async {
+    await binaryArith(i, vm, ArithOp.luaOpShl);
   } // <<
 
-  static void shr(int i, LuaVM vm) {
-    binaryArith(i, vm, ArithOp.luaOpShr);
+  static Future<void> shr(int i, LuaVM vm) async {
+    await binaryArith(i, vm, ArithOp.luaOpShr);
   } // >>
 
-  static void unm(int i, LuaVM vm) {
-    unaryArith(i, vm, ArithOp.luaOpUnm);
+  static Future<void> unm(int i, LuaVM vm) async {
+    await unaryArith(i, vm, ArithOp.luaOpUnm);
   } // -
 
-  static void bnot(int i, LuaVM vm) {
-    unaryArith(i, vm, ArithOp.luaOpBnot);
+  static Future<void> bnot(int i, LuaVM vm) async {
+    await unaryArith(i, vm, ArithOp.luaOpBnot);
   } // ~
 
   // R(A) := RK(B) op RK(C)
-  static void binaryArith(int i, LuaVM vm, ArithOp op) {
+  static Future<void> binaryArith(int i, LuaVM vm, ArithOp op) async {
     int a = Instruction.getA(i) + 1;
     int b = Instruction.getB(i);
     int c = Instruction.getC(i);
     vm.getRK(b);
     vm.getRK(c);
-    vm.arith(op);
+    await vm.arith(op);
     vm.replace(a);
   }
 
   // R(A) := op R(B)
-  static void unaryArith(int i, LuaVM vm, ArithOp op) {
+  static Future<void> unaryArith(int i, LuaVM vm, ArithOp op) async {
     int a = Instruction.getA(i) + 1;
     int b = Instruction.getB(i) + 1;
     vm.pushValue(b);
-    vm.arith(op);
+    await vm.arith(op);
     vm.replace(a);
   }
 
   /* compare */
 
-  static void eq(int i, LuaVM vm) {
-    compare(i, vm, CmpOp.luaOpEq);
+  static Future<void> eq(int i, LuaVM vm) async {
+    await compare(i, vm, CmpOp.luaOpEq);
   } // ==
 
-  static void lt(int i, LuaVM vm) {
-    compare(i, vm, CmpOp.luaOpLt);
+  static Future<void> lt(int i, LuaVM vm) async {
+    await compare(i, vm, CmpOp.luaOpLt);
   } // <
 
-  static void le(int i, LuaVM vm) {
-    compare(i, vm, CmpOp.luaOpLe);
+  static Future<void> le(int i, LuaVM vm) async {
+    await compare(i, vm, CmpOp.luaOpLe);
   } // <=
 
   // if ((RK(B) op RK(C)) ~= A) then pc++
-  static void compare(int i, LuaVM vm, CmpOp op) {
+  static Future<void> compare(int i, LuaVM vm, CmpOp op) async {
     int a = Instruction.getA(i);
     int b = Instruction.getB(i);
     int c = Instruction.getC(i);
     vm.getRK(b);
     vm.getRK(c);
-    if (vm.compare(-2, -1, op) != (a != 0)) {
+    if (await vm.compare(-2, -1, op) != (a != 0)) {
       vm.addPC(1);
     }
     vm.pop(2);
@@ -215,7 +215,7 @@ class Instructions {
   }
 
   // R(A) := R(B).. ... ..R(C)
-  static void concat(int i, LuaVM vm) {
+  static Future<void> concat(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int b = Instruction.getB(i) + 1;
     int c = Instruction.getC(i) + 1;
@@ -224,14 +224,14 @@ class Instructions {
     for (int j = b; j <= c; j++) {
       vm.pushValue(j);
     }
-    vm.concat(n);
+    await vm.concat(n);
     vm.replace(a);
   }
 
   /* for */
 
   // R(A)-=R(A+2); pc+=sBx
-  static void forPrep(int i, LuaVM vm) {
+  static Future<void> forPrep(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int sBx = Instruction.getSBx(i);
 
@@ -250,7 +250,7 @@ class Instructions {
 
     vm.pushValue(a);
     vm.pushValue(a + 2);
-    vm.arith(ArithOp.luaOpSub);
+    await vm.arith(ArithOp.luaOpSub);
     vm.replace(a);
     vm.addPC(sBx);
   }
@@ -259,19 +259,19 @@ class Instructions {
   // if R(A) <?= R(A+1) then {
   //   pc+=sBx; R(A+3)=R(A)
   // }
-  static void forLoop(int i, LuaVM vm) {
+  static Future<void> forLoop(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int sBx = Instruction.getSBx(i);
 
     // R(A)+=R(A+2);
     vm.pushValue(a + 2);
     vm.pushValue(a);
-    vm.arith(ArithOp.luaOpAdd);
+    await vm.arith(ArithOp.luaOpAdd);
     vm.replace(a);
 
     bool isPositiveStep = vm.toNumber(a + 2) >= 0;
-    if (isPositiveStep && vm.compare(a, a + 1, CmpOp.luaOpLe) ||
-        !isPositiveStep && vm.compare(a + 1, a, CmpOp.luaOpLe)) {
+    if (isPositiveStep && await vm.compare(a, a + 1, CmpOp.luaOpLe) ||
+        !isPositiveStep && await vm.compare(a + 1, a, CmpOp.luaOpLe)) {
       // pc+=sBx; R(A+3)=R(A)
       vm.addPC(sBx);
       vm.copy(a, a + 3);
@@ -311,27 +311,27 @@ class Instructions {
   }
 
   // R(A) := R(B)[RK(C)]
-  static void getTable(int i, LuaVM vm) {
+  static Future<void> getTable(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int b = Instruction.getB(i) + 1;
     int c = Instruction.getC(i);
     vm.getRK(c);
-    vm.getTable(b);
+    await vm.getTable(b);
     vm.replace(a);
   }
 
   // R(A)[RK(B)] := RK(C)
-  static void setTable(int i, LuaVM vm) {
+  static Future<void> setTable(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int b = Instruction.getB(i);
     int c = Instruction.getC(i);
     vm.getRK(b);
     vm.getRK(c);
-    vm.setTable(a);
+    await vm.setTable(a);
   }
 
   // R(A)[(C-1)*FPF+i] := R(A+i), 1 <= i <= B
-  static void setList(int i, LuaVM vm) {
+  static Future<void> setList(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int b = Instruction.getB(i);
     int c = Instruction.getC(i);
@@ -348,14 +348,14 @@ class Instructions {
     for (int j = 1; j <= b; j++) {
       idx++;
       vm.pushValue(a + j);
-      vm.setI(a, idx);
+      await vm.setI(a, idx);
     }
 
     if (bIsZero) {
       for (int j = vm.registerCount() + 1; j <= vm.getTop(); j++) {
         idx++;
         vm.pushValue(j);
-        vm.setI(a, idx);
+        await vm.setI(a, idx);
       }
 
       // clear stack
@@ -366,13 +366,13 @@ class Instructions {
   /* call */
 
   // R(A+1) := R(B); R(A) := R(B)[RK(C)]
-  static void self(int i, LuaVM vm) {
+  static Future<void> self(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int b = Instruction.getB(i) + 1;
     int c = Instruction.getC(i);
     vm.copy(b, a + 1);
     vm.getRK(c);
-    vm.getTable(b);
+    await vm.getTable(b);
     vm.replace(a);
   }
 
@@ -488,23 +488,23 @@ class Instructions {
   }
 
   // R(A) := UpValue[B][RK(C)]
-  static void getTabUp(int i, LuaVM vm) {
+  static Future<void> getTabUp(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int b = Instruction.getB(i) + 1;
     int c = Instruction.getC(i);
     vm.getRK(c);
-    vm.getTable(luaUpvalueIndex(b));
+    await vm.getTable(luaUpvalueIndex(b));
     vm.replace(a);
   }
 
   // UpValue[A][RK(B)] := RK(C)
-  static void setTabUp(int i, LuaVM vm) {
+  static Future<void> setTabUp(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int b = Instruction.getB(i);
     int c = Instruction.getC(i);
     vm.getRK(b);
     vm.getRK(c);
-    vm.setTable(luaUpvalueIndex(a));
+    await vm.setTable(luaUpvalueIndex(a));
   }
 
   static int luaUpvalueIndex(int i) {

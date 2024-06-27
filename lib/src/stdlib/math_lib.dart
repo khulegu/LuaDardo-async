@@ -6,30 +6,36 @@ import 'constants.dart' if (dart.library.html) 'constants_js.dart';
 
 class MathLib{
 
-  static const Map<String, DartFunction?> _mathLib = {
+  static Future<int> Function(LuaState) toAsyncFunction(DartFunction f) {
+    return (LuaState ls) async {
+      return await f(ls);
+    };
+  }
+
+  static final Map<String, DartFunctionAsync?> _mathLib = {
     "random":     _random,
-    "randomseed": _randomseed,
+    "randomseed": toAsyncFunction(_randomseed),
     "max":        _max,
     "min":        _min,
-    "exp":        _exp,
-    "log":        _log,
-    "deg":        _deg,
-    "rad":        _rad,
-    "sin":        _sin,
-    "cos":        _cos,
-    "tan":        _tan,
-    "asin":       _asin,
-    "acos":       _acos,
-    "atan":       _atan,
-    "ceil":       _ceil,
-    "floor":      _floor,
-    "fmod":       _fmod,
-    "modf":       _modf,
-    "abs":        _abs,
-    "sqrt":       _sqrt,
+    "exp":        toAsyncFunction(_exp),
+    "log":        toAsyncFunction(_log),
+    "deg":        toAsyncFunction(_deg),
+    "rad":        toAsyncFunction(_rad),
+    "sin":        toAsyncFunction(_sin),
+    "cos":        toAsyncFunction(_cos),
+    "tan":        toAsyncFunction(_tan),
+    "asin":       toAsyncFunction(_asin),
+    "acos":       toAsyncFunction(_acos),
+    "atan":       toAsyncFunction(_atan),
+    "ceil":       toAsyncFunction(_ceil),
+    "floor":      toAsyncFunction(_floor),
+    "fmod":       toAsyncFunction(_fmod),
+    "modf":       toAsyncFunction(_modf),
+    "abs":        toAsyncFunction(_abs),
+    "sqrt":       toAsyncFunction(_sqrt),
     "ult":        _ult,
-    "tointeger":  _tointeger,
-    "type":       _type,
+    "tointeger":  toAsyncFunction(_tointeger),
+    "type":       toAsyncFunction(_type),
     /* placeholders */
     "pi":         null,
     "huge":       null,
@@ -37,23 +43,24 @@ class MathLib{
     "mininteger": null,
   };
 
-  static int openMathLib(LuaState ls) {
-    ls.newLib(_mathLib);
+  static Future<int> openMathLib(LuaState ls) async {
+
+    await ls.newLib(_mathLib);
     ls.pushNumber(math.pi);
-    ls.setField(-2, "pi");
+    await ls.setField(-2, "pi");
     ls.pushNumber(double.infinity);
-    ls.setField(-2, "huge");
+    await ls.setField(-2, "huge");
     ls.pushInteger(int64MaxValue);
-    ls.setField(-2, "maxinteger");
+    await ls.setField(-2, "maxinteger");
     ls.pushInteger(int64MinValue);
-    ls.setField(-2, "mininteger");
+    await ls.setField(-2, "mininteger");
     return 1;
   }
 
 
   static var rng = new math.Random();
 
-  static int _random(LuaState ls) {
+  static Future<int> _random(LuaState ls) async {
     var low, up;
     switch(ls.getTop()){
       case 0:   /* no arguments */
@@ -61,11 +68,11 @@ class MathLib{
         return 1;
       case 1:
         low = 1;
-        up = ls.checkInteger(1);
+        up = await ls.checkInteger(1);
         break;
       case 2:
-        low = ls.checkInteger(1);
-        up = ls.checkInteger(2);
+        low = await ls.checkInteger(1);
+        up = await ls.checkInteger(2);
         break;
       default:
         return ls.error2("wrong number of arguments");
@@ -84,12 +91,12 @@ class MathLib{
     return 0;
   }
 
-  static int _max(LuaState ls){
+  static Future<int> _max(LuaState ls) async {
     var n = ls.getTop(); /* number of arguments */
     var imax = 1;        /* index of current maximum value */
     ls.argCheck(n >= 1, 1, "value expected");
     for (var i = 2; i <= n; i++){
-      if(ls.compare(imax, i, CmpOp.luaOpLt)){
+      if(await ls.compare(imax, i, CmpOp.luaOpLt)){
         imax = i;
       }
     }
@@ -97,12 +104,12 @@ class MathLib{
     return 1;
   }
 
-  static int _min(LuaState ls){
+  static Future<int> _min(LuaState ls) async {
     var n = ls.getTop(); /* number of arguments */
     var imin = 1;        /* index of current maximum value */
     ls.argCheck(n >= 1, 1, "value expected");
     for (var i = 2; i <= n; i++){
-      if(ls.compare(imin, i, CmpOp.luaOpLt)){
+      if(await ls.compare(imin, i, CmpOp.luaOpLt)){
         imin = i;
       }
     }
@@ -266,9 +273,9 @@ class MathLib{
     return 1;
   }
 
-  static int _ult(LuaState ls){
-    var m = ls.checkInteger(1)!;
-    var n = ls.checkInteger(2)!;
+  static Future<int> _ult(LuaState ls) async {
+    var m = (await ls.checkInteger(1))!;
+    var n = (await ls.checkInteger(2))!;
     ls.pushBoolean(m < n);
     return 1;
   }
