@@ -2,10 +2,10 @@ import 'package:lua_dardo_async/lua.dart';
 import 'package:test/test.dart';
 
 
-bool testString(){
+Future<bool> testString() async {
   try{
     LuaState state = LuaState.newState();
-    state.openLibs();
+    await state.openLibs();
     state.loadString(r'''
 --[[
 multi-line comments
@@ -33,7 +33,7 @@ print(string.find("8Abc%a23", "%a", 1, true))
 print(string.find("8Abca23", "Ab"))
 print(string.match("abc123ABC456", "ABC"))
 ''');
-    state.pCall(0, 0, 1);
+    await state.pCall(0, 0, 1);
   }catch(e,s){
     print('$e\n$s');
     return false;
@@ -42,7 +42,7 @@ print(string.match("abc123ABC456", "ABC"))
 }
 
 void main() {
-  test('lua table standard library test', () {
-    expect(testString(), true);
+  test('lua table standard library test', () async {
+    expect(await testString(), true);
   });
 }

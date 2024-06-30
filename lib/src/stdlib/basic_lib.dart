@@ -19,8 +19,8 @@ class BasicLib {
     "dofile": _baseDoFile,
     "pcall": _basePCall,
     "xpcall": toAsyncFunction(_baseXPCall),
-    "getmetatable": toAsyncFunction(_baseGetMetatable),
-    "setmetatable": toAsyncFunction(_baseSetMetatable),
+    "getmetatable": _baseGetMetatable,
+    "setmetatable": _baseSetMetatable,
     "rawequal": _baseRawEqual,
     "rawlen": toAsyncFunction(_baseRawLen),
     "rawget": _baseRawGet,
@@ -60,7 +60,7 @@ class BasicLib {
 // lua-5.3.4/src/lbaselib.c#luaB_print()
   static Future<int> _basePrint(LuaState ls) async {
     int n = ls.getTop(); /* number of arguments */
-    ls.getGlobal('tostring');
+    await ls.getGlobal('tostring');
     for (int i = 1; i <= n; i++) {
       ls.pushValue(-1); /* function to be called */
       ls.pushValue(i); /* value to print */
@@ -152,7 +152,7 @@ class BasicLib {
 // lua-5.3.4/src/lbaselib.c#luaB_pairs()
   static Future<int> _basePairs(LuaState ls) async {
     ls.checkAny(1);
-    if (ls.getMetafield(1, "__pairs") == LuaType.luaNil) {
+    if (await ls.getMetafield(1, "__pairs") == LuaType.luaNil) {
       /* no metamethod? */
       ls.pushDartFunction(toAsyncFunction(_baseNext)); /* will return generator, */
       ls.pushValue(1); /* state, */
@@ -255,25 +255,25 @@ class BasicLib {
 // getmetatable (object)
 // http://www.lua.org/manual/5.3/manual.html#pdf-getmetatable
 // lua-5.3.4/src/lbaselib.c#luaB_getmetatable()
-  static int _baseGetMetatable(LuaState ls) {
+  static Future<int> _baseGetMetatable(LuaState ls) async {
     ls.checkAny(1);
     if (!ls.getMetatable(1)) {
       ls.pushNil();
       return 1; /* no metatable */
     }
-    ls.getMetafield(1, "__metatable");
+    await ls.getMetafield(1, "__metatable");
     return 1; /* returns either __metatable field (if present) or metatable */
   }
 
 // setmetatable (table, metatable)
 // http://www.lua.org/manual/5.3/manual.html#pdf-setmetatable
 // lua-5.3.4/src/lbaselib.c#luaB_setmetatable()
-  static int _baseSetMetatable(LuaState ls) {
+  static Future<int> _baseSetMetatable(LuaState ls) async {
     LuaType t = ls.type(2);
     ls.checkType(1, LuaType.luaTable);
     ls.argCheck(t == LuaType.luaNil || t == LuaType.luaTable, 2,
         "nil or table expected");
-    if (ls.getMetafield(1, "__metatable") != LuaType.luaNil) {
+    if (await ls.getMetafield(1, "__metatable") != LuaType.luaNil) {
       return ls.error2("cannot change a protected metatable");
     }
     ls.setTop(2);

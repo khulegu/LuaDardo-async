@@ -7,6 +7,10 @@
 A Lua virtual machine written in [Dart](https://github.com/dart-lang/sdk), which implements [Lua5.3](http://www.lua.org/manual/5.3/) version.
 This is a fork that implements async functions wrappers.
 
+## Disclaimer
+
+Modules like `math.random()` do not work. as a temporary fix you can use them out of their module like `math.random()` -> `random()`.
+
 Original : [LuaDardo](https://github.com/arcticfox1919/LuaDardo)
 
 ## Example:

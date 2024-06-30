@@ -45,7 +45,10 @@ class MathLib{
 
   static Future<int> openMathLib(LuaState ls) async {
 
-    await ls.newLib(_mathLib);
+    //await ls.newLib(_mathLib);
+    ls.pushGlobalTable();
+    await ls.setFuncsAsync(_mathLib, 0); // Replace mathlib with global because it's broken
+
     ls.pushNumber(math.pi);
     await ls.setField(-2, "pi");
     ls.pushNumber(double.infinity);
