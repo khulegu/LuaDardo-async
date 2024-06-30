@@ -29,9 +29,9 @@ abstract class LuaAuxLib {
   String? optString(int arg, String d);
 
 /* Load functions */
-  bool doFile(String filename);
+  Future<bool> doFile(String filename);
 
-  bool doString(String str);
+  Future<bool> doString(String str);
 
   ThreadStatus loadFile(String? filename);
 
@@ -44,7 +44,7 @@ abstract class LuaAuxLib {
 
   Future<String?> toString2(int idx);
 
-  int? len2(int idx);
+  Future<int?> len2(int idx);
 
   Future<bool> getSubTable(int idx, String fname);
 

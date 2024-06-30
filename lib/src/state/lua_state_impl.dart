@@ -14,8 +14,6 @@ import 'package:sprintf/sprintf.dart';
 import '../number/lua_number.dart';
 
 import '../stdlib/basic_lib.dart';
-import '../api/lua_state.dart';
-import '../api/lua_type.dart';
 import '../api/lua_vm.dart';
 import '../binchunk/binary_chunk.dart';
 import '../compiler/compiler.dart';
@@ -367,7 +365,7 @@ class LuaStateImpl implements LuaState, LuaVM {
       case CmpOp.luaOpEq:
         return await Comparison.eq(a, b, this);
       case CmpOp.luaOpLt:
-        return Comparison.lt(a, b, this);
+        return await Comparison.lt(a, b, this);
       case CmpOp.luaOpLe:
         return await Comparison.le(a, b, this);
       default:
@@ -934,15 +932,15 @@ class LuaStateImpl implements LuaState, LuaVM {
   }
 
   @override
-  bool doFile(String filename) {
+  Future<bool> doFile(String filename) async {
     return loadFile(filename) == ThreadStatus.luaOk &&
-        pCall(0, luaMultret, 0) == ThreadStatus.luaOk;
+        await pCall(0, luaMultret, 0) == ThreadStatus.luaOk;
   }
 
   @override
-  bool doString(String str) {
+  Future<bool> doString(String str) async {
     return loadString(str) == ThreadStatus.luaOk &&
-        pCall(0, luaMultret, 0) == ThreadStatus.luaOk;
+        await pCall(0, luaMultret, 0) == ThreadStatus.luaOk;
   }
 
   @override
@@ -988,8 +986,8 @@ class LuaStateImpl implements LuaState, LuaVM {
   }
 
   @override
-  int? len2(int idx) {
-    len(idx);
+  Future<int?> len2(int idx) async {
+    await len(idx);
     int? i = toIntegerX(-1);
     if (i == null) {
       error2("object length is not an integer");

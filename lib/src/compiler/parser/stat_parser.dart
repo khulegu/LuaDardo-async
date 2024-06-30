@@ -267,7 +267,7 @@ class StatParser {
     List<Exp> vars = <Exp>[];
     vars.add(checkVar(lexer, var0));               // var
     while (lexer.LookAhead() == TokenKind.TOKEN_SEP_COMMA) { // {
-      lexer.nextToken();                         // ,
+      lexer.nextToken();
       Exp exp = PrefixExpParser.parsePrefixExp(lexer);           // var
       vars.add(checkVar(lexer, exp));            //
     }                                              // }

@@ -146,7 +146,7 @@ class TableLib {
 
   static Future<int?> _auxGetN(LuaState ls, int n, int w) async {
     await _checkTab(ls, n, w | TAB_L);
-    return ls.len2(n);
+    return await ls.len2(n);
   }
 
 /*
@@ -198,7 +198,7 @@ class TableLib {
 // lua-5.3.4/src/ltablib.c#unpack()
   static Future<int> _tabUnpack(LuaState ls) async {
     var i = (await ls.optInteger(2, 1))!;
-    var e = (await ls.optInteger(3, ls.len2(1)))!;
+    var e = (await ls.optInteger(3, await ls.len2(1)))!;
     if (i > e) {
       /* empty range */
       return 0;
@@ -223,7 +223,7 @@ class TableLib {
 // http://www.lua.org/manual/5.3/manual.html#pdf-table.sort
   static Future<int> _tabSort(LuaState ls) async {
     var sort = _SortHelper(ls);
-    var len = sort.len()!;
+    var len = (await sort.len())!;
     ls.argCheck(len < MAX_LEN, 1, "array too big");
     await sort.quickSort(0, len - 1);
     return 0;
@@ -235,8 +235,8 @@ class _SortHelper {
 
   _SortHelper(this.ls);
 
-  int? len() {
-    return ls.len2(1);
+  Future<int?> len() async {
+    return await ls.len2(1);
   }
 
   Future<bool> _less(int i, int j) async {
@@ -245,7 +245,7 @@ class _SortHelper {
       ls.pushValue(2);
       await ls.getI(1, i + 1);
       await ls.getI(1, j + 1);
-      ls.call(2, 1);
+      await ls.call(2, 1);
       var b = ls.toBoolean(-1);
       ls.pop(1);
       return b;

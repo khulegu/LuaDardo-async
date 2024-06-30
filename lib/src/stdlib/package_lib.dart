@@ -178,7 +178,7 @@ class PackageLib {
     }
 
     // module set no value?
-    if (ls.getField(2, name) == LuaType.luaNil) {
+    if (await ls.getField(2, name) == LuaType.luaNil) {
       ls.pushBoolean(true); // use true as result
       ls.pushValue(-1); // extra copy to be returned
       await ls.setField(2, name); // LOADED[name] = true
@@ -188,7 +188,7 @@ class PackageLib {
 
   static Future<void> _findLoader(LuaState ls, String? name) async {
     // push 'package.searchers' to index 3 in the stack
-    if (ls.getField(Instructions.luaUpvalueIndex(1), "searchers") !=
+    if (await ls.getField(Instructions.luaUpvalueIndex(1), "searchers") !=
         LuaType.luaTable) {
       ls.error2("'package.searchers' must be a table");
       return;
@@ -206,7 +206,7 @@ class PackageLib {
       }
 
       ls.pushString(name);
-      ls.call(1, 2); // call it
+      await ls.call(1, 2); // call it
 
       if (ls.isFunction(-2)) {
         // did it find a loader?

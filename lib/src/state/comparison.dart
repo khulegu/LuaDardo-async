@@ -28,7 +28,7 @@ class Comparison {
     }
   }
 
-  static bool lt(Object? a, Object? b, LuaStateImpl ls) {
+  static Future<bool> lt(Object? a, Object? b, LuaStateImpl ls) async {
     if (a is String && b is String) {
       return a.compareTo(b) < 0;
     }
@@ -49,7 +49,7 @@ class Comparison {
 
     Object? mm = ls.getMetamethod(a, b, "__lt");
     if (mm != null) {
-      return LuaValue.toBoolean(ls.callMetamethod(a, b, mm));
+      return LuaValue.toBoolean(await ls.callMetamethod(a, b, mm));
     }
 
     throw Exception("comparison error!");

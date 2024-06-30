@@ -119,7 +119,7 @@ final opCodes = <OpCode>[
   OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iABC , "UNM",Instructions.unm), // R(A) := -R(B)
   OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iABC , "BNOT",Instructions.bnot), // R(A) := ~R(B)
   OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iABC , "NOT",toAsyncOp(Instructions.not)), // R(A) := not R(B)
-  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iABC , "LEN",toAsyncOp(Instructions.length)), // R(A) := length of R(B)
+  OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iABC , "LEN",Instructions.length), // R(A) := length of R(B)
   OpCode(0, 1, OpArgMask.OpArgR, OpArgMask.OpArgR, OpMode.iABC , "CONCAT",Instructions.concat), // R(A) := R(B).. ... ..R(C)
   OpCode(0, 0, OpArgMask.OpArgR, OpArgMask.OpArgN, OpMode.iAsBx , "JMP",toAsyncOp(Instructions.jmp)), // pc+=sBx; if (A) close all upvalues >= R(A - 1)
   OpCode(1, 0, OpArgMask.OpArgK, OpArgMask.OpArgK, OpMode.iABC , "EQ",Instructions.eq), // if ((RK(B) == RK(C)) ~= A) then pc++

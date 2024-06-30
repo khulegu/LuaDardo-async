@@ -207,10 +207,10 @@ class Instructions {
   /* len & concat */
 
   // R(A) := length of R(B)
-  static void length(int i, LuaVM vm) {
+  static Future<void> length(int i, LuaVM vm) async {
     int a = Instruction.getA(i) + 1;
     int b = Instruction.getB(i) + 1;
-    vm.len(b);
+    await vm.len(b);
     vm.replace(a);
   }
 

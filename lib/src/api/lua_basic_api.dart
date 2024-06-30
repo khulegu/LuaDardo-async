@@ -151,7 +151,7 @@ abstract class LuaBasicAPI {
   Future<ThreadStatus> pCall(int nArgs, int nResults, int msgh);
 
 /* miscellaneous functions */
-  void len(int idx);
+  Future<void> len(int idx);
 
   Future<void> concat(int n);
 
