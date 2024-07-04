@@ -1,6 +1,6 @@
 name: lua_dardo_async
 description: A Lua virtual machine written in Dart, which implements Lua5.3 version, with async functions.
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/Pebloop/LuaDardo-async.git
 
 environment:
