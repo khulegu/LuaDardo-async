@@ -26,7 +26,9 @@ class TableLib {
   static Future<int> openTableLib(LuaState ls) async {
 
 
-    await ls.newLib(_tabFuncs);
+    //await ls.newLib(_tabFuncs);
+    ls.pushGlobalTable();
+    await ls.setFuncsAsync(_tabFuncs, 0); // Replace tablib with global because it's broken
     return 1;
   }
 

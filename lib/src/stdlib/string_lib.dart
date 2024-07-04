@@ -35,8 +35,10 @@ class StringLib {
 
   static Future<int> openStringLib(LuaState ls) async {
 
-    await ls.newLib(_strLib);
+    //await ls.newLib(_strLib);
     await _createMetatable(ls);
+    ls.pushGlobalTable();
+    await ls.setFuncsAsync(_strLib, 0); // Replace strlib with global because it's broken
     return 1;
   }
 
